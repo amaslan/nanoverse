@@ -45,7 +45,7 @@ import test.EslimeTestCase;
  */
 public class TriggerProcessTest extends EslimeTestCase {
 
-    private TriggerProcess trigger;
+    private TriggerProcessCoordinate trigger;
     private CellLayer layer;
     private MockLayerManager layerManager;
     private MockGeneralParameters p;
@@ -65,7 +65,9 @@ public class TriggerProcessTest extends EslimeTestCase {
         BaseProcessArguments arguments = makeBaseProcessArguments(layerManager, p);
         CellProcessArguments cpArguments = makeCellProcessArguments(geom);
 
-        trigger = new TriggerProcess(arguments, cpArguments, "test", new NullFilter(), true, false);
+//        trigger = new TriggerProcess(arguments, cpArguments, "test", new NullFilter(), true, false);
+        trigger = new TriggerProcessCoordinate(arguments, cpArguments, "test", new NullFilter(), true, false);
+
     }
 
     /**
@@ -127,7 +129,7 @@ public class TriggerProcessTest extends EslimeTestCase {
         BaseProcessArguments arguments = makeBaseProcessArguments(layerManager, p);
         CellProcessArguments cpArguments = makeCellProcessArguments(geom);
 
-        trigger = new TriggerProcess(arguments, cpArguments, "test", new NullFilter(), true, true);
+        trigger = new TriggerProcessCoordinate(arguments, cpArguments, "test", new NullFilter(), true, true);
 
         // Set up two neighboring cells and one isolated cell.
         MockCell neighbor1 = new MockCell();

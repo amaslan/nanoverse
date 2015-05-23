@@ -146,6 +146,9 @@ public abstract class ProcessFactory {
             CellProcessArguments cpArguments = makeCellProcessArguments(e, layerManager, p);
             return new Record(arguments, cpArguments);
 
+        } else if (processClass.equalsIgnoreCase("increment-health")) {
+            CellProcessArguments cpArguments = makeCellProcessArguments(e, layerManager, p);
+            return new IncrementHealth(arguments, cpArguments);
         } else {
             String msg = "Unrecognized process '" +
                     processClass + ".'";

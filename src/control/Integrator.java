@@ -92,6 +92,7 @@ public class Integrator {
         // number generator and to update paths to reflect the next
         // iterate.
         p.advance();
+        serializationManager.close();
         return ex;
     }
 

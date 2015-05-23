@@ -80,7 +80,7 @@ public class ExpandWeighted extends Action {
         HashSet<Coordinate> affectedSites = shoveHelper.shoveWeighted(parentLocation);
 
         // Step 2: Clone parent.
-        Cell child = getCallback().replicate();
+        Cell child = getCallback().replicateZeroHealth();
 
         // Step 3: Place child in parent location.
         u.place(child, parentLocation);

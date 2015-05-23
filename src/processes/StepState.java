@@ -50,6 +50,10 @@ public class StepState {
     private double dt;
     private double startTime;
     private int frame;
+    private int count;
+    private double lifeAve;
+    private double lifeTotal;
+    private int numCells;
 
     public StepState(double startTime, int frame) {
         highlights = new HashMap<>();
@@ -57,6 +61,10 @@ public class StepState {
         this.startTime = startTime;
         this.frame = frame;
         this.recorded = false;
+        count = 0;
+        lifeAve = 0.0;
+        lifeTotal = 0.0;
+        numCells = 0;
     }
 
     public void highlight(Coordinate c, Integer channel) {
@@ -105,5 +113,28 @@ public class StepState {
 
     public CellLayer getRecordedCellLayer() {
         return recordedCellLayer;
+    }
+
+    public void incrementDeathCount(int incr) {
+        count += incr;
+    }
+
+    public int getDeathCount() {
+        return count;
+    }
+
+    public void incrementNumCells(int incr) {
+        numCells +=incr;
+    }
+
+    public int getNumCells() {
+        return numCells;
+    }
+    public void incrementLifeTotal(double incr) {
+        lifeTotal +=incr;
+    }
+
+    public double getLifeTotal() {
+        return lifeTotal;
     }
 }

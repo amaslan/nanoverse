@@ -42,6 +42,7 @@ import layers.LayerManager;
 import org.dom4j.Element;
 import structural.utilities.XmlUtil;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +109,22 @@ public abstract class SerializationFactory {
             return ret;
         } else if (writerClass.equalsIgnoreCase("correlation-writer")) {
             return correlationWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("death-rate-writer")) {
+            return deathRateWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("time-correlation-writer")) {
+            return timeCorrelationWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("auto-correlation-writer")) {
+            return autoCorrelationWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("surface-auto-correlation-writer")) {
+            return surfaceAutoCorrelationWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("l2-surface-auto-correlation-writer")) {
+            return l2SurfaceAutoCorrelationWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("diversity-writer")) {
+            return diversityWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("diversity-radial-writer")) {
+            return diversityRadialWriter(e, p, lm);
+        } else if (writerClass.equalsIgnoreCase("lifetime-writer")) {
+            return lifetimeWriter(e, p, lm);
         } else {
             throw new IllegalArgumentException("Unrecognized serialization '" + writerClass + "'");
         }
@@ -135,6 +152,44 @@ public abstract class SerializationFactory {
         Argument<Double> triggerTimeArg = DoubleArgumentFactory.instantiate(e, "trigger-time", 0.0, p.getRandom());
         String filename = XmlUtil.getString(e, "filename", "correlation.txt");
         return new CorrelationWriter(p, filename, triggerTimeArg, lm);
+    }
+
+    private static AutoCorrelationWriter autoCorrelationWriter(Element e, GeneralParameters p, LayerManager lm) {
+        Argument<Double> triggerTimeArg = DoubleArgumentFactory.instantiate(e, "trigger-time", 0.0, p.getRandom());
+        String filename = XmlUtil.getString(e, "filename", "autoCorrelation.txt");
+        return new AutoCorrelationWriter(p, filename, triggerTimeArg, lm);
+    }
+
+    private static SurfaceAutoCorrelationWriter surfaceAutoCorrelationWriter(Element e, GeneralParameters p, LayerManager lm) {
+        Argument<Double> triggerTimeArg = DoubleArgumentFactory.instantiate(e, "trigger-time", 0.0, p.getRandom());
+        String filename = XmlUtil.getString(e, "filename", "surfaceAutoCorrelation.txt");
+        return new SurfaceAutoCorrelationWriter(p, filename, triggerTimeArg, lm);
+    }
+
+    private static L2SurfaceAutoCorrelationWriter l2SurfaceAutoCorrelationWriter(Element e, GeneralParameters p, LayerManager lm) {
+        Argument<Double> triggerTimeArg = DoubleArgumentFactory.instantiate(e, "trigger-time", 0.0, p.getRandom());
+        String filename = XmlUtil.getString(e, "filename", "l2SurfaceAutoCorrelation.txt");
+        return new L2SurfaceAutoCorrelationWriter(p, filename, triggerTimeArg, lm);
+    }
+
+    private static DeathRateWriter deathRateWriter(Element e, GeneralParameters p, LayerManager lm) {
+        return new DeathRateWriter(p, lm);
+    }
+
+    private static TimeCorrelationWriter timeCorrelationWriter(Element e, GeneralParameters p, LayerManager lm) {
+        return new TimeCorrelationWriter(p, lm);
+    }
+
+    private static DiversityWriter diversityWriter(Element e, GeneralParameters p, LayerManager lm) {
+        return new DiversityWriter(p, lm);
+    }
+
+    private static LifetimeWriter lifetimeWriter(Element e, GeneralParameters p, LayerManager lm) {
+        return new LifetimeWriter(p, lm);
+    }
+
+    private static DiversityRadialWriter diversityRadialWriter(Element e, GeneralParameters p, LayerManager lm) {
+        return new DiversityRadialWriter(p, lm);
     }
 
     private static VisualizationSerializer visualizationSerializer(Element e,

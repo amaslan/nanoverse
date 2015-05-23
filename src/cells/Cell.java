@@ -107,6 +107,12 @@ public abstract class Cell {
         return clone(state);
     }
 
+    public Cell replicateZeroHealth() throws HaltCondition {
+        Cell cell = clone(state);
+        cell.setHealth(0.0);
+        return cell;
+    }
+
     /**
      * Informs the cell that it has been given a direct benefit.
      * The effect of this benefit depends on the cell class.

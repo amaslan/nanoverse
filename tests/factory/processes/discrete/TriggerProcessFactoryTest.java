@@ -43,7 +43,7 @@ import layers.cell.CellLayer;
 import org.dom4j.Element;
 import processes.BaseProcessArguments;
 import processes.discrete.CellProcessArguments;
-import processes.discrete.TriggerProcess;
+import processes.discrete.TriggerProcessCoordinate;
 import processes.discrete.filter.DepthFilter;
 import processes.discrete.filter.Filter;
 import processes.discrete.filter.NullFilter;
@@ -77,8 +77,8 @@ public class TriggerProcessFactoryTest extends EslimeTestCase {
         BaseProcessArguments arguments = makeBaseProcessArguments(layerManager, p);
         CellProcessArguments cpArguments = makeCellProcessArguments(geom);
 
-        TriggerProcess expected = new TriggerProcess(arguments, cpArguments, "default", new NullFilter(), false, false);
-        TriggerProcess actual = TriggerProcessFactory.instantiate(testElem, layerManager, p, 0);
+        TriggerProcessCoordinate expected = new TriggerProcessCoordinate(arguments, cpArguments, "default", new NullFilter(), false, false);
+        TriggerProcessCoordinate actual = TriggerProcessFactory.instantiate(testElem, layerManager, p, 0);
 
         assertEquals(expected, actual);
     }
@@ -94,8 +94,8 @@ public class TriggerProcessFactoryTest extends EslimeTestCase {
 
         Filter filter = new DepthFilter(layerManager.getCellLayer(), new ConstantInteger(1));
 
-        TriggerProcess expected = new TriggerProcess(arguments, cpArguments, "test", filter, true, true);
-        TriggerProcess actual = TriggerProcessFactory.instantiate(testElem, layerManager, p, 0);
+        TriggerProcessCoordinate expected = new TriggerProcessCoordinate(arguments, cpArguments, "test", filter, true, true);
+        TriggerProcessCoordinate actual = TriggerProcessFactory.instantiate(testElem, layerManager, p, 0);
 
         assertEquals(expected, actual);
     }

@@ -52,6 +52,8 @@ public class CorrelationWriter extends Serializer {
 
     //The number of identity observations as a function of L1 distance.
     private HashMap<Integer, Double> identity;
+    private HashMap<Integer, Double> identity2;
+    private HashMap<Integer, Double> identity3;
 
     //The total number of number of observations at each L1 distance.
     private HashMap<Integer, Double> observations;
@@ -60,6 +62,8 @@ public class CorrelationWriter extends Serializer {
     private boolean fired;
 
     private String filename;
+    private StepState ss;
+    private double end;
 
     /**
      * @param p
@@ -71,6 +75,8 @@ public class CorrelationWriter extends Serializer {
     public CorrelationWriter(GeneralParameters p, String filename, Argument<Double> triggerTimeArg, LayerManager lm) {
         super(p, lm);
         identity = new HashMap<>();
+        identity2 = new HashMap<>();
+        identity3 = new HashMap<>();
         observations = new HashMap<>();
         try {
             this.triggerTime = triggerTimeArg.next();
@@ -88,6 +94,28 @@ public class CorrelationWriter extends Serializer {
 
     @Override
     public void dispatchHalt(HaltCondition ex) {
+        end = ex.getGillespie();
+        long start = System.currentTimeMillis();
+        // Has the analysis fired yet? If so, return.
+        if (fired) {
+            return;
+        }
+
+        CellLayer layer = ss.getRecordedCellLayer();
+        Geometry geom = layer.getGeometry();
+        Coordinate[] cc = geom.getCanonicalSites();
+        // Iterate over all canonical sites.
+        for (Coordinate i : cc) {
+            // For each canonical site of state 1, iterate over all canonical sites.
+            if (layer.getViewer().getState(i) == 1) {
+                for (Coordinate j : cc) {
+                    recordObservation(i, j, layer);
+                }
+            }
+        }
+        // Mark the analysis event as having fired.
+        long total = System.currentTimeMillis() - start;
+        fired = true;
     }
 
     private TreeMap<Integer, Double> calcCorrelations() {
@@ -95,6 +123,34 @@ public class CorrelationWriter extends Serializer {
 
         for (Integer r : observations.keySet()) {
             double x = getIdentities(r);
+            double n = observations.get(r);
+
+            double p = x / n;
+            double cor = (p * 2.0) - 1.0;
+            corMap.put(r, cor);
+        }
+        return corMap;
+    }
+
+    private TreeMap<Integer, Double> calcCorrelations2() {
+        TreeMap<Integer, Double> corMap = new TreeMap<>();
+
+        for (Integer r : observations.keySet()) {
+            double x = getIdentities2(r);
+            double n = observations.get(r);
+
+            double p = x / n;
+            double cor = (p * 2.0) - 1.0;
+            corMap.put(r, cor);
+        }
+        return corMap;
+    }
+
+    private TreeMap<Integer, Double> calcCorrelations3() {
+        TreeMap<Integer, Double> corMap = new TreeMap<>();
+
+        for (Integer r : observations.keySet()) {
+            double x = getIdentities3(r);
             double n = observations.get(r);
 
             double p = x / n;
@@ -115,11 +171,36 @@ public class CorrelationWriter extends Serializer {
         return x;
     }
 
+    private double getIdentities2(Integer r) {
+        double x;
+        if (!identity2.containsKey(r)) {
+            x = 0.0;
+        } else {
+            x = identity2.get(r);
+        }
+
+        return x;
+    }
+
+    private double getIdentities3(Integer r) {
+        double x;
+        if (!identity3.containsKey(r)) {
+            x = 0.0;
+        } else {
+            x = identity3.get(r);
+        }
+
+        return x;
+    }
+
     @Override
     public void close() {
 
         TreeMap<Integer, Double> correlations = calcCorrelations();
+        TreeMap<Integer, Double> correlations2 = calcCorrelations2();
+        TreeMap<Integer, Double> correlations3 = calcCorrelations3();
 
+        // CORRELATIONS WITH CELL STATE 1
         StringBuilder sb = new StringBuilder();
         // Write a header row
         for (Integer r : correlations.keySet()) {
@@ -127,7 +208,7 @@ public class CorrelationWriter extends Serializer {
             sb.append(r);
         }
         sb.append("\n");
-        sb.append(triggerTime);
+        sb.append(end);
 
         // Write each entry
         for (Integer r : correlations.keySet()) {
@@ -141,34 +222,57 @@ public class CorrelationWriter extends Serializer {
         BufferedWriter writer = makeBufferedWriter(path);
         hAppend(writer, sb);
         hClose(writer);
+
+        // CORRELATIONS WITH CELL STATE 2
+        StringBuilder sb2 = new StringBuilder();
+        // Write a header row
+        for (Integer r : correlations2.keySet()) {
+            sb2.append("\t");
+            sb2.append(r);
+        }
+        sb2.append("\n");
+        sb2.append(end);
+
+        // Write each entry
+        for (Integer r : correlations2.keySet()) {
+            sb2.append("\t");
+            sb2.append(correlations2.get(r));
+        }
+
+        // Write the output to a file
+        String path2 = p.getPath() + '/' + '2' + filename;
+        mkDir(p.getPath(), true);
+        BufferedWriter writer2 = makeBufferedWriter(path2);
+        hAppend(writer2, sb2);
+        hClose(writer2);
+
+        // CORRELATIONS WITH CELL STATE 3
+        StringBuilder sb3 = new StringBuilder();
+        // Write a header row
+        for (Integer r : correlations3.keySet()) {
+            sb3.append("\t");
+            sb3.append(r);
+        }
+        sb3.append("\n");
+        sb3.append(end);
+
+        // Write each entry
+        for (Integer r : correlations3.keySet()) {
+            sb3.append("\t");
+            sb3.append(correlations3.get(r));
+        }
+
+        // Write the output to a file
+        String path3 = p.getPath() + '/' + '3' + filename;
+        mkDir(p.getPath(), true);
+        BufferedWriter writer3 = makeBufferedWriter(path3);
+        hAppend(writer3, sb3);
+        hClose(writer3);
     }
 
     @Override
     public void flush(StepState stepState) {
-        long start = System.currentTimeMillis();
-        // Has the analysis fired yet? If so, return.
-        if (fired) {
-            return;
-        }
-
-        // Is it time to fire yet? If not, return.
-        if (stepState.getTime() < triggerTime) {
-            return;
-        }
-
-        CellLayer layer = stepState.getRecordedCellLayer();
-        Geometry geom = layer.getGeometry();
-        Coordinate[] cc = geom.getCanonicalSites();
-        // Iterate over all canonical sites.
-        for (Coordinate i : cc) {
-            // For each canonical site, iterate over all canonical sites.
-            for (Coordinate j : cc) {
-                recordObservation(i, j, layer);
-            }
-        }
-        // Mark the analysis event as having fired.
-        long total = System.currentTimeMillis() - start;
-        fired = true;
+        ss = stepState;
     }
 
     private void recordObservation(Coordinate i, Coordinate j, CellLayer l) {
@@ -184,8 +288,18 @@ public class CorrelationWriter extends Serializer {
             increment(identity, r);
         }
 
-        // Record that an observation occurred.
+        if (jState == 2) {
+            // Record that an observation occurred.
+            increment(identity2, r);
+        }
+
+        if (jState == 3) {
+            // Record that an observation occurred.
+            increment(identity3, r);
+        }
+
         increment(observations, r);
+
     }
 
     private void increment(HashMap<Integer, Double> map, Integer key) {

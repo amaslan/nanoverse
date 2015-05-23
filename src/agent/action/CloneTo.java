@@ -33,6 +33,8 @@ import control.identifiers.Coordinate;
 import layers.LayerManager;
 import layers.cell.CellLayerViewer;
 import layers.cell.CellUpdateManager;
+import processes.StepState;
+
 
 import java.util.List;
 import java.util.Random;
@@ -80,6 +82,7 @@ public class CloneTo extends Action {
 
         CellUpdateManager u = getLayerManager().getCellLayer().getUpdateManager();
         CellLayerViewer v = getLayerManager().getCellLayer().getViewer();
+        StepState ss = getLayerManager().getStepState();
 
         for (Coordinate target : targets) {
 
@@ -99,6 +102,8 @@ public class CloneTo extends Action {
             }
             // Highlight sites
             highlight(target, self);
+
+            ss.incrementDeathCount(1);
         }
 
     }

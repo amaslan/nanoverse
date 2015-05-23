@@ -336,7 +336,7 @@ public class ShoveHelper {
      *                         TODO: This is so cloodgy and terrible.
      */
     private void calculateDistToVacancy(Coordinate currentLocation, Coordinate d, HashSet<Coordinate> sites) throws HaltCondition {
-        // base case: if the currentLocation is vacant, can stop shoving
+        // base case: if the currentLocation is vacant, can stop shovingq
         if (!layerManager.getCellLayer().getViewer().isOccupied(currentLocation)) {
             return;
         }
